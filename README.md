@@ -1,4 +1,4 @@
-# Ciencia de Dados e Inteligencia Artificial - Alunos: Joao Vitor Ribeiro Flauzni e Otavio Dias de Melo
+# Ciencia de Dados e Inteligencia Artificial - Alunos: Joao Vitor Ribeiro Flauzino e Otavio Dias de Melo
 
 # Sistema de Avaliação de Aprendizado
 
