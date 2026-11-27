@@ -68,12 +68,31 @@ public class RealizacaoDAO {
 
                 String statusFinal = possuiDissertativa ? "FINALIZADA" : "CORRIGIDA";
 
-                String sqlRealiza = "INSERT INTO realiza (email_aluno, codigo_avaliacao, status, data) " +
-                        "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+                String sqlBuscaRealiza = "SELECT status FROM realiza WHERE email_aluno = ? AND codigo_avaliacao = ? FOR UPDATE";
+                String statusAtual;
+                try (PreparedStatement psCheck = conn.prepareStatement(sqlBuscaRealiza)) {
+                    psCheck.setString(1, submissao.getEmailAluno());
+                    psCheck.setString(2, submissao.getCodigoAvaliacao());
+                    try (ResultSet rs = psCheck.executeQuery()) {
+                        if (!rs.next()) {
+                            throw new IllegalArgumentException("Este aluno nao foi indicado para realizar esta avaliacao.");
+                        }
+                        statusAtual = rs.getString("status");
+                    }
+                }
+
+                if ("FINALIZADA".equals(statusAtual) || "CORRIGIDA".equals(statusAtual)) {
+                    throw new ConflitoDadosException("Este aluno ja realizou e enviou esta avaliacao.");
+                }
+
+                limparRespostasParciais(conn, submissao.getEmailAluno(), submissao.getCodigoAvaliacao());
+
+                String sqlRealiza = "UPDATE realiza SET status = ?, data = CURRENT_TIMESTAMP " +
+                        "WHERE email_aluno = ? AND codigo_avaliacao = ?";
                 try (PreparedStatement psR = conn.prepareStatement(sqlRealiza)) {
-                    psR.setString(1, submissao.getEmailAluno());
-                    psR.setString(2, submissao.getCodigoAvaliacao());
-                    psR.setString(3, statusFinal);
+                    psR.setString(1, statusFinal);
+                    psR.setString(2, submissao.getEmailAluno());
+                    psR.setString(3, submissao.getCodigoAvaliacao());
                     psR.executeUpdate();
                 }
 
@@ -329,6 +348,21 @@ public class RealizacaoDAO {
             return detalhe;
         } catch (SQLException e) {
             throw new DaoException("Erro ao carregar detalhes da avaliacao realizada.", e);
+        }
+    }
+
+    private void limparRespostasParciais(Connection conn, String emailAluno, String codigoAvaliacao) throws SQLException {
+        String[] sqls = {
+                "DELETE FROM resposta_objetiva WHERE email_aluno = ? AND codigo_avaliacao = ?",
+                "DELETE FROM resposta_livre WHERE email_aluno = ? AND codigo_avaliacao = ?",
+                "DELETE FROM resposta WHERE email_aluno = ? AND codigo_avaliacao = ?"
+        };
+        for (String sql : sqls) {
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, emailAluno);
+                ps.setString(2, codigoAvaliacao);
+                ps.executeUpdate();
+            }
         }
     }
 

@@ -78,7 +78,7 @@ public class RelatorioDAO {
             SELECT 
                 a.titulo AS "avaliacao",
                 COALESCE(SUM(CASE WHEN r.status IN ('FINALIZADA', 'CORRIGIDA') THEN 1 ELSE 0 END), 0) AS "respondidas",
-                COALESCE(SUM(CASE WHEN r.status NOT IN ('FINALIZADA', 'CORRIGIDA') OR r.status IS NULL THEN 1 ELSE 0 END), 0) AS "pendentes"
+                COALESCE(SUM(CASE WHEN r.status = 'EM_ANDAMENTO' THEN 1 ELSE 0 END), 0) AS "pendentes"
             FROM avaliacao a
             LEFT JOIN realiza r 
                 ON r.codigo_avaliacao = a.codigo

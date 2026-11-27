@@ -19,14 +19,35 @@ public class AlunoDAO {
 
     @Transactional
     public void cadastrar(Aluno aluno) {
-        String sqlUsuario = "INSERT INTO usuario (email, nome, senha) VALUES (?, ?, ?)";
+        if (aluno == null || aluno.getEmail() == null || aluno.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Informe o e-mail do aluno.");
+        }
+        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
+            throw new IllegalArgumentException("Informe o nome do aluno.");
+        }
+        if (aluno.getSenha() == null || aluno.getSenha().isBlank()) {
+            throw new IllegalArgumentException("Informe a senha do aluno.");
+        }
+        if (aluno.getMatricula() == null || aluno.getMatricula().isBlank()) {
+            throw new IllegalArgumentException("Informe a matricula do aluno.");
+        }
+
+        String email = aluno.getEmail().trim();
+        String nome = aluno.getNome().trim();
+        String senha = aluno.getSenha().trim();
+        String matricula = aluno.getMatricula().trim();
+        aluno.setEmail(email);
+        aluno.setNome(nome);
+        aluno.setMatricula(matricula);
+
+        String sqlUsuario = "INSERT INTO usuario (email, nome, senha, perfil) VALUES (?, ?, ?, 'ALUNO')";
         String sqlAluno = "INSERT INTO aluno (email_usuario, matricula) VALUES (?, ?)";
 
         try {
-            jdbcTemplate.update(sqlUsuario, aluno.getEmail(), aluno.getNome(), aluno.getSenha());
-            jdbcTemplate.update(sqlAluno, aluno.getEmail(), aluno.getMatricula());
+            jdbcTemplate.update(sqlUsuario, email, nome, senha);
+            jdbcTemplate.update(sqlAluno, email, matricula);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflitoDadosException("Já existe um usuário ou aluno cadastrado com estes dados.");
+            throw new ConflitoDadosException("Ja existe um usuario ou aluno cadastrado com estes dados.");
         }
     }
 

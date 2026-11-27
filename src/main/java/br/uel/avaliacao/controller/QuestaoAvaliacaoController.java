@@ -1,7 +1,10 @@
 package br.uel.avaliacao.controller;
 
+import br.uel.avaliacao.model.Alternativa;
 import br.uel.avaliacao.model.QuestaoAvaliacao;
+import br.uel.avaliacao.model.UsuarioSessao;
 import br.uel.avaliacao.service.QuestaoAvaliacaoService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,8 +28,19 @@ public class QuestaoAvaliacaoController {
     }
 
     @GetMapping
-    public List<QuestaoAvaliacao> listar(@PathVariable String codigo) {
-        return questaoAvaliacaoService.listarPorAvaliacao(codigo);
+    public List<QuestaoAvaliacao> listar(@PathVariable String codigo, HttpSession sessao) {
+        List<QuestaoAvaliacao> questoes = questaoAvaliacaoService.listarPorAvaliacao(codigo);
+        Object attr = sessao != null ? sessao.getAttribute(AuthController.SESSAO_USUARIO) : null;
+        if (attr instanceof UsuarioSessao usuario && usuario.isAluno()) {
+            for (QuestaoAvaliacao q : questoes) {
+                if (q.getAlternativas() != null) {
+                    for (Alternativa alt : q.getAlternativas()) {
+                        alt.setCorreta(false);
+                    }
+                }
+            }
+        }
+        return questoes;
     }
 
     @PostMapping

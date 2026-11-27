@@ -1,5 +1,6 @@
 package br.uel.avaliacao.controller;
 
+import br.uel.avaliacao.dao.AcessoNegadoException;
 import br.uel.avaliacao.dao.ConflitoDadosException;
 import br.uel.avaliacao.dao.DaoException;
 import br.uel.avaliacao.dao.RecursoNaoEncontradoException;
@@ -25,6 +26,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidPayload(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("erro", "Requisicao invalida. Verifique os campos enviados."));
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<Map<String, String>> handleForbidden(AcessoNegadoException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("erro", ex.getMessage()));
     }
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
