@@ -1,3 +1,5 @@
+# Ciencia de Dados e Inteligencia Artificial - Alunos: Joao Vitor Ribeiro Flauzni e Otavio Dias de Melo
+
 # Sistema de Avaliação de Aprendizado
 
 Projeto desenvolvido para a disciplina de Banco de Dados usando Java com Spring Boot, PostgreSQL e JDBC puro (com classes DAO escritas por nós, sem usar JPA/Hibernate).
